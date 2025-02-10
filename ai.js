@@ -1,23 +1,53 @@
 const axios = require("axios");
 require("dotenv").config();
 
-async function getAIResponse(userInput) {
-    try {
-        const prompt = `You are a friendly Telegram bot named DeviceLinker. 
-        Your role is to help users with their queries in a simple and fun way.
-        Only reply in short, simple sentences. Keep it engaging and easy to understand.
-        If the user asks something irrelevant, politely say "I don't know that yet!". 
-        User: "${userInput}" 
-        Bot:`;
+// Memory storage for chat history (stores last 5 messages per user)
+const chatMemory = {};
 
+async function getAIResponse(userId, userInput) {
+    try {
+        // Initialize chat history for the user if not exists
+        if (!chatMemory[userId]) {
+            chatMemory[userId] = [];
+        }
+
+        // Add user input to history
+        chatMemory[userId].push({ role: "user", parts: [{ text: userInput }] });
+
+        // Keep only the last 5 messages (to prevent memory overflow)
+        if (chatMemory[userId].length > 5) {
+            chatMemory[userId].shift();
+        }
+
+        // Construct system prompt (Custom instruction)
+        const systemMessage = {
+            role: "system",
+            parts: [{
+                text: `You are a friendly Telegram bot named DeviceLinker. 
+                Your role is to help users with their queries in a simple and fun way.
+                Only reply in short, simple sentences. Keep it engaging and easy to understand.
+                If the user asks something irrelevant, politely say "I don't know that yet!".`
+            }]
+        };
+
+        // Construct chat history with system prompt
+        const messages = [systemMessage, ...chatMemory[userId]];
+
+        // Call Gemini API
         const res = await axios.post(
-            `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateText?key=${process.env.GEMINI_API_KEY}`,
-            { prompt: { text: prompt } }
+            `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${process.env.GEMINI_API_KEY}`,
+            { contents: messages }
         );
 
-        return res.data.candidates?.[0]?.output || "I'm here to help!";
+        // Extract AI response
+        const aiResponse = res.data.candidates?.[0]?.content?.parts?.[0]?.text || "I'm here to help!";
+
+        // Add AI response to chat history
+        chatMemory[userId].push({ role: "model", parts: [{ text: aiResponse }] });
+
+        return aiResponse;
     } catch (error) {
-        console.error("AI API error:", error);
+        console.error("AI API error:", error.response?.data || error.message);
         return "There was an error processing your request.";
     }
 }
