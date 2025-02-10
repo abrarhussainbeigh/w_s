@@ -20,7 +20,7 @@ bot.start(async (ctx) => {
                 caption: "📢 *Join our channel first!*",
                 parse_mode: "Markdown",
                 reply_markup: Markup.inlineKeyboard([
-                    Markup.button.url("Join Now", `https://t.me/${CHANNEL_ID.replace("@", "")}`),
+                    Markup.button.url("Join Now", `https://t.me/koshurboiiyt, "")}`),
                     Markup.button.callback("✅ I've Joined", "check_join"),
                 ]),
             }
@@ -46,6 +46,27 @@ bot.on("text", async (ctx) => {
 
     if (userMessage.includes("referral")) {
         return ctx.reply(`🎁 Your referral code: ${generateReferralCode(ctx.from.id)}`);
+    }
+
+    const aiReply = await getAIResponse(userMessage);
+    ctx.reply(aiReply);
+});
+
+bot.on("text", async (ctx) => {
+    const userMessage = ctx.message.text.toLowerCase();
+
+    if (userMessage.includes("panel")) {
+        return ctx.replyWithPhoto(
+            "https://i0.wp.com/picjumbo.com/wp-content/uploads/look-of-a-deer-in-a-rainy-forest-free-image.jpeg?w=1024&quality=50",
+            {
+                caption: "😈 here you go",
+                parse_mode: "Markdown",
+                reply_markup: Markup.inlineKeyboard([
+                    Markup.button.url("Join Now", `https://t.me/DeviceLinker_bot, "")}`),
+                    
+                ]),
+            }
+        );
     }
 
     const aiReply = await getAIResponse(userMessage);
