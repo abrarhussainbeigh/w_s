@@ -21,7 +21,7 @@ async function getAIResponse(userId, userInput) {
 
         // Construct system prompt (Custom instruction)
         const systemMessage = {
-            role: "system",
+            role: "user",
             parts: [{
                 text: `You are a friendly Telegram bot named DeviceLinker. 
                 Your role is to help users with their queries in a simple and fun way.
@@ -47,9 +47,9 @@ async function getAIResponse(userId, userInput) {
 
         return aiResponse;
     } catch (error) {
-        console.error("AI API error:", error.response?.data || error.message);
-        return "There was an error processing your request.";
-    }
+    console.error("AI API error:", error.response?.data || error.message);
+    return `There was an error processing your request. ${error.message}`;
+}
 }
 
 module.exports = { getAIResponse };
