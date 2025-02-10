@@ -12,7 +12,7 @@ const CHANNEL_ID = process.env.CHANNEL_ID;
 bot.start(async (ctx) => {
     const userId = ctx.from.id;
 
-    // Check if user joined the channel
+    // Check if the user has joined the channel
     const isJoined = await checkIfJoined(userId);
     if (!isJoined) {
         return ctx.replyWithPhoto(
@@ -37,7 +37,7 @@ bot.action("check_join", async (ctx) => {
     const isJoined = await checkIfJoined(userId);
 
     if (isJoined) {
-        ctx.editMessageCaption("✅ Thank you for joining! You can now chat with me.");
+        ctx.editMessageText("✅ Thank you for joining! You can now chat with me.");
     } else {
         ctx.answerCbQuery("❌ You haven't joined yet!", { show_alert: true });
     }
@@ -66,7 +66,7 @@ bot.on("text", async (ctx) => {
         );
     }
 
-    // 🔹 AI RESPONSE
+    // 🔹 AI RESPONSE (Handles conversation history)
     const aiReply = await getAIResponse(ctx.from.id, userMessage);
     ctx.reply(aiReply);
 });
